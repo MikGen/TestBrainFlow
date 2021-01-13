@@ -18,7 +18,7 @@ The source code for the following publications:
 
 ## Installation and documentation
 
-https://neuralflow.readthedocs.io/
+https://testbrainflow.readthedocs.io/en/latest/
 
 
 
