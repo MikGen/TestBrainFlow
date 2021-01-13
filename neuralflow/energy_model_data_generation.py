@@ -52,8 +52,10 @@ def generate_data(self, deltaT=0.00001, time_epoch = [(0,1)], decision_bnd=None,
     #Convert decision_bnd into a list for convinience if needed    
     if decision_bnd is None:
         decision_bnd=[None]*len(time_epoch)
+    #By default, the boundary mode is reflecting
+    boundary_mode = self.boundary_mode if self.boundary_mode is not None else 'reflecting' 
     return self._generate_data(self.peq_, self.p0_, self.D_, self.firing_model_, self.num_neuron, 
-                self.boundary_mode, deltaT, time_epoch, decision_bnd, last_event_is_spike)
+                boundary_mode, deltaT, time_epoch, decision_bnd, last_event_is_spike)
     
 def _generate_data(self, peq, p0, D, firing_rate_model, num_neuron, boundary_mode, deltaT, time_epoch, decision_bnd, last_event_is_spike):
     """Generates synthetic spike data and latent trajectories from a given model defined by (peq,p0,D,firing_rate_model). 
@@ -321,7 +323,7 @@ def _generate_diffusion(self, peq, p0, D, boundary_mode, deltaT, time_epoch, dec
     for i,iTrial in enumerate(iter_list):
         # generate time bins
         time_bins[iTrial] =  np.arange(time_epoch[iTrial][0],time_epoch[iTrial][1],deltaT)
-        num_bin = len( time_bins[iTrial] )
+        num_bin = len( time_bins[iTrial] ) - 1
         y = np.zeros(num_bin+1)
         y[0] = x0[iTrial]
         
