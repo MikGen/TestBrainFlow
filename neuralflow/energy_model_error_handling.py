@@ -168,7 +168,10 @@ def _check_optimization_options(self, optimizer, options):
     """Checks optimization options
     """
     
-    data, save, inference,optimization = options['data'], options['save'], options['inference'],options['optimization']
+    data,optimization = options['data'], options['optimization']
+    save =  options['save'] if 'save' in options else None
+    inference = options['inference'] if 'inference' in options else None
+    
     
     data_options=['dataTR','dataCV']
     save_options=['path','stride','sim_start','sim_id','schedule']
