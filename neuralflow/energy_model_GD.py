@@ -189,17 +189,26 @@ def _GD_optimization(self,data,save,inference,optimization):
         iter_list = range(new_sim+sim_start,new_sim+sim_start+max_iteration)
         if self.verbose:
             iter_list = tqdm(iter_list)
-       
+        
+        
         for i,iIter in enumerate(iter_list):
             
             #compute gradients and loglikelihood
             if gd_type=='simultaneous_update':
                 gradients = self._get_loglik_data(dataTR, metadataTR, peq, rho0, D, fr, 'gradient', params_to_opt, None)
+                #Extract loglikelihoods
+                ll=gradients['loglik']
+                if dataCV is not None:
+                    llCV=self.score(dataCV,metadataCV,peq,rho0,D,fr)
             
-            for param in params_to_opt:
+            for inum,param in enumerate(params_to_opt):
                 if gd_type=='coordinate_descent':
                     gradients = self._get_loglik_data(dataTR, metadataTR, peq, rho0, D, fr, 'gradient', [param], None)
-                
+                    if inum==0:
+                        ll=gradients['loglik']
+                        if dataCV is not None:
+                            llCV=self.score(dataCV,metadataCV,peq,rho0,D,fr)
+                    
                 #Calculate the gradient descent update
                 gd_update = gamma[param] *gradients[param]
                     
@@ -228,11 +237,6 @@ def _GD_optimization(self,data,save,inference,optimization):
                     p0/=np.sum(p0*self.w_d_)
                     rho0=p0/np.sqrt(peq)
                     rho0[peq<10**-3]=0
-            
-            #Extract loglikelihoods
-            ll=gradients['loglik']
-            if dataCV is not None:
-                llCV=self.score(dataCV,metadataCV,peq,rho0,D,fr)
             
             #Update loglik (delayed  by 1 iteration)
             if i+new_sim>0:

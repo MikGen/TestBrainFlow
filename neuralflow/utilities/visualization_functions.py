@@ -83,10 +83,10 @@ def plot_fitting_results(figure_handle1,figure_handle2,em_fit,em_gt,fit_options,
     ll_gt=em_gt.score(fit_options['data']['dataTR'],metadata=fit_options['inference']['metadataTR'])
     rel_lls = (ll_gt-em_fit.iterations_GD_['logliks'])/ll_gt
     iterations_all=np.arange(1,rel_lls.size+1)
-    ax.plot(iterations_all,rel_lls,Linewidth=3,color=[0.35,0.35,0.35])
-    ax.plot(iterations_all,np.zeros_like(iterations_all),'--',Linewidth=3,color=[0.5,0.5,0.5])
+    ax.plot(iterations_all,rel_lls,linewidth=3,color=[0.35,0.35,0.35])
+    ax.plot(iterations_all,np.zeros_like(iterations_all),'--',linewidth=3,color=[0.5,0.5,0.5])
     for i,iteration in enumerate(iterations):
-        ax.plot(iterations_all[iteration],rel_lls[iteration],'.',MarkerSize=60,color=colors[i])
+        ax.plot(iterations_all[iteration],rel_lls[iteration],'.',markersize=60,color=colors[i])
 
     plt.ylabel(r'Relative $\log\mathscr{L}$',fontsize=15)
     plt.xlabel('Iteration number',fontsize=15)
@@ -97,10 +97,10 @@ def plot_fitting_results(figure_handle1,figure_handle2,em_fit,em_gt,fit_options,
     ax = plt.subplot(figure_handle2)
     
     #Potential is negative log of peq
-    ax.plot(em_gt.x_d_,-np.log(em_gt.peq_),Linewidth=3,color='black',label='Ground-truth')
-    ax.plot(em_fit.x_d_,-np.log(em_fit.iterations_GD_['peqs'][...,0]),Linewidth=3,color=[0.5,0.5,0.5],label='Initialization')
+    ax.plot(em_gt.x_d_,-np.log(em_gt.peq_),linewidth=3,color='black',label='Ground-truth')
+    ax.plot(em_fit.x_d_,-np.log(em_fit.iterations_GD_['peqs'][...,0]),linewidth=3,color=[0.5,0.5,0.5],label='Initialization')
     for i,iteration in enumerate(iterations):
-        ax.plot(em_fit.x_d_,-np.log(em_fit.iterations_GD_['peqs'][...,iteration]),Linewidth=3,color=colors[i],label='Iteration {}'.format(iteration))
+        ax.plot(em_fit.x_d_,-np.log(em_fit.iterations_GD_['peqs'][...,iteration]),linewidth=3,color=colors[i],label='Iteration {}'.format(iteration))
     plt.legend(fontsize=15)
     plt.xlabel(r'Latent state, $x$',fontsize=15)
     plt.ylabel(r'Potential, $\Phi(x)$',fontsize=15)

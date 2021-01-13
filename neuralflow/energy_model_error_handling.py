@@ -171,7 +171,9 @@ def _check_optimization_options(self, optimizer, options):
     data,optimization = options['data'], options['optimization']
     save =  options['save'] if 'save' in options else None
     inference = options['inference'] if 'inference' in options else {}
-    
+    if 'inference' not in options:
+        options['inference'] = {'metadataTR':None,'metadataCV':None}
+    inference = options['inference']
     
     data_options=['dataTR','dataCV']
     save_options=['path','stride','sim_start','sim_id','schedule']

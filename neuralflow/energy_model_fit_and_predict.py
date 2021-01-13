@@ -56,8 +56,8 @@ def score(self, data, metadata=None, peq=None, rho0=None, D=None, fr=None):
     if D is None:
         D=self.D_
         
-    if self.verbose:
-        print("Evaluating model likelihood on the provided data...")
+    #if self.verbose:
+        #print("Evaluating model likelihood on the provided data...")
     
     return self._get_loglik_data(data, metadata, peq, rho0, D, fr, 'likelihood', None, None)['loglik']
     

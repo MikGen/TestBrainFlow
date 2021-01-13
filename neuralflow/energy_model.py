@@ -190,10 +190,12 @@ class EnergyModel(BaseEstimator):
         self.firing_model = firing_model
         self.peq_model = peq_model
         self.p0_model=p0_model
+        self.boundary_mode=boundary_mode
         self.D0 = D0
         self.Nv = Nv if Nv is not None else self.pde_solve_.N-2
+        self.pde_solve_param=pde_solve_param
         self.verbose = verbose
-        
+        self.self_var=None
         
         # copy the pointers for the grid points, integration weights, derivative matrix, number of grid points,
         # and Integration function for convinience 
