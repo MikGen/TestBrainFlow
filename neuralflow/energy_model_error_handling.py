@@ -170,7 +170,7 @@ def _check_optimization_options(self, optimizer, options):
     
     data,optimization = options['data'], options['optimization']
     save =  options['save'] if 'save' in options else None
-    inference = options['inference'] if 'inference' in options else None
+    inference = options['inference'] if 'inference' in options else []
     
     
     data_options=['dataTR','dataCV']
