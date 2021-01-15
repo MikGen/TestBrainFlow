@@ -77,7 +77,7 @@ class PDESolve:
     w_d : numpy array (N,), dtype=float
         Weights of the nodes (on the global grid). 
     x_d: numpy array (N,), dtype=float
-        Grid points (on the global grid).
+        Domain grid points.
     
     Hidden attributes
     -----------------
