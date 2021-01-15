@@ -33,7 +33,7 @@ class PDESolve:
         The right boundary of the latent state. The default is 1.
     method : dictionary
         A dictionary that contains 2 keys: 
-            name : string and 'gridsize'.
+            name : string
                 Specifies the method for the numerical solution of EV problem, can be either 'FD' or 'SEM' (forward differences or spectral elements method). 
             gridsize : dictionary 
                 Specifies number of grid size points N for 'FD' method, or Np and Ne for 'SEM' method (Ne is the number of elements, Np is the number of grid points in each element).
