@@ -58,7 +58,7 @@ class PDESolve:
         Availiable options:
             'full' - use full integration matrix.
             'sparse' - use sparse integration matrix with bias.
-        The default is 'full'. See Supplementary Materials 2.3 for details.
+        The default is 'full'. See Supplementary Materials 2.3 from M. Genkin, T. A. Engel, Nat Mach Intell 2, 674–683 (2020) for details.
         
     Attributes
     ----------
