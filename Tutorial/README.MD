@@ -1,1 +1,1 @@
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/MikGen/TestBrainFlow/blob/master/Tutorial/Example1.ipynb)
+Exercise 1 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/MikGen/TestBrainFlow/blob/master/Tutorial/Example1.ipynb)
