@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-
-# This is a part of EnergyModel class
-# This source file contains functions related to log-likelihood and it's derivatives calculation (and the supporting functions)
+"""This is a part of neuralflow package/EnergyModel class.
+This source file contains functions related to log-likelihood and it's derivatives calculation (and the supporting functions)"""
 
 import numpy as np
 from scipy import linalg

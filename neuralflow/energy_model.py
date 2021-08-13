@@ -2,6 +2,9 @@
 #          Mikhail Genkin <mgenkin@cshl.edu>         
 #
 
+"""This is a part of neuralflow package/EnergyModel class.
+This source file contains the definition of energy model class."""
+
 
 import numpy as np
 import numbers

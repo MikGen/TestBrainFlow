@@ -1,10 +1,8 @@
 #  
 #
 
-"""
-The built-in models for the peq probability density
-submodule for the energy_model module.
-
+"""This is a part of neuralflow package/EnergyModel class.
+This source file contains template peq functions.
 Equilibirum probability distribution is related to potential U(x)=-log(peq).
 """
 

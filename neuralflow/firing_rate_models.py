@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# This is a part of EnergyModel class
-# This source file contains template firing rate functions 
+"""This is a part of neuralflow package/EnergyModel class.
+This source file contains template firing rate functions."""
 
 
 

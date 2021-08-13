@@ -1,3 +1,6 @@
+"""This is a part of neuralflow package.
+This source file contains cython implementation of G function.
+"""
 cimport numpy as np
 
 def getGamma0(np.ndarray[np.float64_t, ndim=2] G,

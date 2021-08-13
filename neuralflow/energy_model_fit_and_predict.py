@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-
-# This is a part of EnergyModel class
-# This source file contains public functions related to fitting, result saving, and switching between F and peq representations
+"""This is a part of neuralflow package/EnergyModel class.
+This source file contains public functions related to fitting, result saving, and switching between F and peq representations."""
 
 import numpy as np
 import os.path

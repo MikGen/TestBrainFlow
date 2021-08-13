@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-# This is a part of EnergyModel class
-# This source file contains functions for checking the inputs
+"""This is a part of neuralflow package/EnergyModel class.
+This source file contains functions for checking the input parameters and EnergyModel class initialization."""
 
 import numpy as np, numbers, os
 

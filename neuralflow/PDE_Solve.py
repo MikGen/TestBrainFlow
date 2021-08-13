@@ -2,7 +2,8 @@
 
 # This is a auxilliary class of neuralflow package
 
-"""
+"""This is a part of neuralflow package/EnergyModel class.
+
 Solves Stourm-Liouville problem:
     (D*p(x)y')'+q(x)y=lambda w(x) y
     with specified boundary conditions. 

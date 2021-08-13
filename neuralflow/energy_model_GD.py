@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# This is a part of EnergyModel class
-# This source file contains functions related to gradient descent optimization
+"""This is a part of neuralflow package/EnergyModel class.
+This source file contains functions related to gradient descent optimization"""
 import numpy as np
 import sys
 from tqdm import tqdm
