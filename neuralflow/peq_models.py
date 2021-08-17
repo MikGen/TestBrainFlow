@@ -179,7 +179,7 @@ def linear_pot(x,w,slope=1):
     peq : numpy array, dtype=float
         Probability density distribution evaluated at grid ponits x.
     """
-    V=slope*x
+    V=slope*x 
     peq = np.exp(-V)  
     # normalization
     peq /= sum(w*peq)
@@ -294,7 +294,37 @@ def uniform(x, w):
     
     return peq
 
+def sine_waves(x, w, xbegin=-1.0, xend=1.0):
+    """Cosine-squareed model.
 
+        y, L --> peq(y, L) ~ cos( y*pi/L )**2
+        
+        integral peq(x) dx =1
+        y - x centered on the middle of the domain
+        L - domain length
+
+    Parameters
+    ----------
+    x : numpy array (N,), dtype=float
+        Grid points in which the model will be evaluated. N is the number of grid points.
+    w : numpy array (N,), dtype=float
+        Weights used to evaluate integrals by the Gaussian quadrature.    
+    xbegin: float
+        Left boundary of the x domain. The default is -1.
+    xend: float
+        Right boundary of the x-domain. The default is 1.
+
+    Returns
+    -------
+    peq : numpy array (N,), dtype=float
+        Probability density distribution evaluated at grid ponits x.
+    """
+    y = x-(xbegin+xend)/2
+    L = xend-xbegin
+    peq = np.sin(2*y*np.pi/L)+2
+    # normalization
+    peq /= sum(w*peq)
+    return peq
 
 peq_model_mixtures = {
     'cos_square': cos_square,

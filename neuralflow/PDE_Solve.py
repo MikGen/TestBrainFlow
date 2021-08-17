@@ -300,8 +300,9 @@ class PDESolve:
         if mode=='h0' or mode=='hdark':
             Qx = sparse.diags(np.sqrt(peq), 0).dot(QxOrig) 
         
-        assert(all(np.abs(lQ[i]) <= np.abs(lQ[i+1]) for i in range(len(lQ)-1))), \
-            'Error! Returned eigenvalues are not sorted'    
+        # #yep this holds even when 0 is an eval
+        # assert(all(np.abs(lQ[i]) <= np.abs(lQ[i+1]) for i in range(len(lQ)-1))), \
+        #     'Error! Returned eigenvalues are not sorted'    
             
         
         #Perform additional computations for 'hdark' mode
@@ -579,29 +580,74 @@ class PDESolve:
         
         if isinstance(self.BoundCond,np.ndarray):
             self.BC_=self.BoundCond
-        else:
+        
+        # BC_ vector for 01 type boundary set to zero  --------------------------------------------------------------------
+        elif 'coupled' in self.BoundCond.keys():
             self.BC_=np.zeros(4)
+
+        else:            
+            self.BC_=np.zeros(4)
+            
             if self.BoundCond['leftB']=='Robin':
                 self.BC_[0]=self.BoundCond['leftBCoeff']['c1']
                 self.BC_[1]=self.BoundCond['leftBCoeff']['c2']
-            else:
+            elif self.BoundCond['leftB']=='Neumann' or self.BoundCond['leftB']=='Dirichlet':
                 self.BC_[:2]={'Dirichlet': np.array([1,0]), 'Neumann':np.array([0,1])}.get(self.BoundCond['leftB'])
     
             if self.BoundCond['rightB']=='Robin':
                 self.BC_[2]=self.BoundCond['rightBCoeff']['c1']
                 self.BC_[3]=self.BoundCond['rightBCoeff']['c2']
-            else:
+            elif self.BoundCond['rightB']=='Neumann' or self.BoundCond['leftB']=='Dirichlet':
                 self.BC_[2:]={'Dirichlet': np.array([1,0]), 'Neumann':np.array([0,1])}.get(self.BoundCond['rightB'])
+    
+
+        # else:
+        #     self.BC_=np.zeros(4)
+        #     if self.BoundCond['leftB']=='Robin':
+        #         self.BC_[0]=self.BoundCond['leftBCoeff']['c1']
+        #         self.BC_[1]=self.BoundCond['leftBCoeff']['c2']
+        #     else:
+        #         self.BC_[:2]={'Dirichlet': np.array([1,0]), 'Neumann':np.array([0,1])}.get(self.BoundCond['leftB'])
+    
+        #     if self.BoundCond['rightB']=='Robin':
+        #         self.BC_[2]=self.BoundCond['rightBCoeff']['c1']
+        #         self.BC_[3]=self.BoundCond['rightBCoeff']['c2']
+        #     else:
+        #         self.BC_[2:]={'Dirichlet': np.array([1,0]), 'Neumann':np.array([0,1])}.get(self.BoundCond['rightB'])
     
     def _get_Nullspace(self):
         """Calculates Nullspace of a projection on boundary conditions operator
         """
         if self.BC_method=='projection':
-            BCmat=np.zeros((2,self.N))
-            BCmat[0,:]=np.append(self.BC_[0],np.zeros((1,self.N-1)))+self.BC_[1]*self.dmat_d[0,:]
-            BCmat[1,:]=np.append(np.zeros((1,self.N-1)),self.BC_[2])+self.BC_[3]*self.dmat_d[-1,:]
-            self.NullM_ = nullspace(BCmat)
+
+            ## commented 08/17:
+            # BCmat=np.zeros((2,self.N))
+            # BCmat[0,:]=np.append(self.BC_[0],np.zeros((1,self.N-1)))+self.BC_[1]*self.dmat_d[0,:]
+            # BCmat[1,:]=np.append(np.zeros((1,self.N-1)),self.BC_[2])+self.BC_[3]*self.dmat_d[-1,:]
+            # self.NullM_ = nullspace(BCmat)
+            # self.NullM_ = sparse.csr_matrix(self.NullM_)
+
+            # add periodic BCmat ------------------------------------------------------------------------------------
+            if 'coupled' in  self.BoundCond.keys():
+                if self.BoundCond['coupled'] == 'periodic':
+                    BCmat=np.zeros((2,self.N))
+                    # BCmat[0, :] should look like [1, 0, ..., 0. -1]
+                    BCmat[0,0]= 1
+                    BCmat[0,-1]= -1
+                    # dmat_d is a sparse matrix:
+                    BCmat[1,:] = (self.dmat_d[0,:] - self.dmat_d[-1,:]).toarray()
+
+            # robin type BCmat:
+            else:
+                BCmat=np.zeros((2,self.N))
+                BCmat[0,:]=np.append(self.BC_[0], np.zeros((1,self.N-1)))+self.BC_[1]*self.dmat_d[0,:] # first row for x_start
+                BCmat[1,:]=np.append(np.zeros((1,self.N-1)), self.BC_[2])+self.BC_[3]*self.dmat_d[-1,:] # second row for x_end
+
+            self.BCmat = BCmat
+
+            self.NullM_ = nullspace(BCmat) # find the space that M v = 0, this NullM_ * a = a_tilda will satisfy boundary condition, project original space N to N-2
             self.NullM_ = sparse.csr_matrix(self.NullM_)
+    
     
     def _set_AD_mat(self):
         """Calculates Integration Matrix that can be used to calculate antiderivative
@@ -709,15 +755,40 @@ class PDESolve:
         if isinstance(self.BoundCond,np.ndarray):
             assert (len(self.BoundCond)==4 and np.abs(self.BoundCond[0])+np.abs(self.BoundCond[1])>0 and 
                 np.abs(self.BoundCond[2])+np.abs(self.BoundCond[3])>0 ), 'Incorrect Boundary conditions' 
+        
+        ## commented 08/17 ---------------------------
+        # else:
+        #     assert ('leftB' in self.BoundCond and 'rightB' in self.BoundCond), 'Incorrect Boundary Conditions'
+        #     assert (self.BoundCond['leftB'] in ['Dirichlet', 'Neumann', 'Robin']), 'Unknown left boundary condition'
+        #     assert (self.BoundCond['rightB'] in ['Dirichlet', 'Neumann', 'Robin']), 'Unknown right boundary condition'
+        #     if self.BoundCond['leftB']=='Robin':
+        #         assert ('leftBCoeff' in self.BoundCond.keys()), 'leftBCoeff entry is missing in BoundCond' 
+        #         assert ('c1' in self.BoundCond['leftBCoeff'].keys() and 'c2' in self.BoundCond['leftBCoeff'].keys()), 'values for Robin left boundary condition unspecifyed'
+        #         assert (isinstance(self.BoundCond['leftBCoeff']['c1'],numbers.Number) and isinstance(self.BoundCond['leftBCoeff']['c2'],numbers.Number)),'values for Robin left boundary condition are incorrect'
+        #     if self.BoundCond['rightB']=='Robin':
+        #         assert ('rightBCoeff' in self.BoundCond.keys()), 'rightBCoeff entry is missing in BoundCond' 
+        #         assert ('c1' in self.BoundCond['rightBCoeff'] and 'c2' in self.BoundCond['rightBCoeff']), 'values for Robin right boundary condition unspecifyed'
+        #         assert (isinstance(self.BoundCond['rightBCoeff']['c1'],numbers.Number) and isinstance(self.BoundCond['rightBCoeff']['c2'],numbers.Number)),'values for Robin right boundary condition are incorrect'
+
+
+        # add Periodic: --------------------------------------------------------------------------------
         else:
-            assert ('leftB' in self.BoundCond and 'rightB' in self.BoundCond), 'Incorrect Boundary Conditions'
-            assert (self.BoundCond['leftB'] in ['Dirichlet', 'Neumann', 'Robin']), 'Unknown left boundary condition'
-            assert (self.BoundCond['rightB'] in ['Dirichlet', 'Neumann', 'Robin']), 'Unknown right boundary condition'
-            if self.BoundCond['leftB']=='Robin':
-                assert ('leftBCoeff' in self.BoundCond.keys()), 'leftBCoeff entry is missing in BoundCond' 
-                assert ('c1' in self.BoundCond['leftBCoeff'].keys() and 'c2' in self.BoundCond['leftBCoeff'].keys()), 'values for Robin left boundary condition unspecifyed'
-                assert (isinstance(self.BoundCond['leftBCoeff']['c1'],numbers.Number) and isinstance(self.BoundCond['leftBCoeff']['c2'],numbers.Number)),'values for Robin left boundary condition are incorrect'
-            if self.BoundCond['rightB']=='Robin':
-                assert ('rightBCoeff' in self.BoundCond.keys()), 'rightBCoeff entry is missing in BoundCond' 
-                assert ('c1' in self.BoundCond['rightBCoeff'] and 'c2' in self.BoundCond['rightBCoeff']), 'values for Robin right boundary condition unspecifyed'
-                assert (isinstance(self.BoundCond['rightBCoeff']['c1'],numbers.Number) and isinstance(self.BoundCond['rightBCoeff']['c2'],numbers.Number)),'values for Robin right boundary condition are incorrect'
+            assert (('leftB' in self.BoundCond and 'rightB' in self.BoundCond) or ('coupled' in self.BoundCond)), 'Incorrect Boundary Conditions'
+            if 'leftB' in  self.BoundCond.keys():
+                assert (self.BoundCond['leftB'] in ['Dirichlet', 'Neumann', 'Robin']), 'Unknown left boundary condition'
+                assert (self.BoundCond['rightB'] in ['Dirichlet', 'Neumann', 'Robin']), 'Unknown right boundary condition'
+
+                # if we have 'leftB'/'rightB' in BoundCond:
+                if self.BoundCond['leftB']=='Robin':
+                    assert ('leftBCoeff' in self.BoundCond.keys()), 'leftBCoeff entry is missing in BoundCond' 
+                    assert ('c1' in self.BoundCond['leftBCoeff'].keys() and 'c2' in self.BoundCond['leftBCoeff'].keys()), 'values for Robin left boundary condition unspecifyed'
+                    assert (isinstance(self.BoundCond['leftBCoeff']['c1'],numbers.Number) and isinstance(self.BoundCond['leftBCoeff']['c2'],numbers.Number)),'values for Robin left boundary condition are incorrect'
+                if self.BoundCond['rightB']=='Robin':
+                    assert ('rightBCoeff' in self.BoundCond.keys()), 'rightBCoeff entry is missing in BoundCond' 
+                    assert ('c1' in self.BoundCond['rightBCoeff'] and 'c2' in self.BoundCond['rightBCoeff']), 'values for Robin right boundary condition unspecifyed'
+                    assert (isinstance(self.BoundCond['rightBCoeff']['c1'],numbers.Number) and isinstance(self.BoundCond['rightBCoeff']['c2'],numbers.Number)),'values for Robin right boundary condition are incorrect'
+
+            elif 'coupled' in self.BoundCond.keys():
+                assert (self.BoundCond['coupled'] in ['periodic', 'periodic_fixed']), 'Unknown right boundary condition'
+
+            

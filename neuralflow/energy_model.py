@@ -145,9 +145,10 @@ class EnergyModel(BaseEstimator):
         'custom': peq_models.custom,
         'jump_spline2': peq_models.jump_spline2,
         'linear_pot':peq_models.linear_pot,
+        'sine_waves':peq_models.sine_waves
     }
 
-    _boundary_modes = ['reflecting','absorbing']
+    _boundary_modes = ['reflecting','absorbing','circular']
     _optimizer_types = ['GD']
     _parameters_to_optimize = ['F','F0','D']
 
@@ -178,16 +179,26 @@ class EnergyModel(BaseEstimator):
         
         #Enforce the boundary conditions for the chosen boundary mode
         if boundary_mode is not None:
-            bcs={"reflecting":"Neumann","absorbing":"Dirichlet"}[boundary_mode]
-            if verbose and "BoundCond" in pde_solve_param: 
-                if pde_solve_param["BoundCond"]!= {'leftB': bcs, "rightB": bcs}:
-                    print('WARNING: Enforcing {} boundary conditions'.format(bcs))
-            pde_solve_param["BoundCond"] =  {'leftB': bcs, "rightB": bcs}        
+
+            bcs={"reflecting":"Neumann","absorbing":"Dirichlet","circular":"periodic"}[boundary_mode]
+           
+            ## added 08/17:
+            if bcs == "periodic":
+                pde_solve_param["BoundCond"] =  {'coupled': bcs}
+            else: 
+                pde_solve_param["BoundCond"] =  {'leftB': bcs, "rightB": bcs}  
+            
+            ## commented out 08/17:
+
+            # if verbose and "BoundCond" in pde_solve_param: 
+            #     if pde_solve_param["BoundCond"]!= {'leftB': bcs, "rightB": bcs}:
+            #         print('WARNING: Enforcing {} boundary conditions'.format(bcs))
+            # pde_solve_param["BoundCond"] =  {'leftB': bcs, "rightB": bcs}  
+               
         self.boundary_mode = boundary_mode
         
         # create an instance of the PDESolve class for numerical solution of PDEs for ll calculation
         self.pde_solve_ = PDE_Solve.PDESolve(**pde_solve_param)
-        
         #Initiliaze the parameters
         self.num_neuron = num_neuron
         self.firing_model = firing_model
