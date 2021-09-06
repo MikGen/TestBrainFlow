@@ -1,0 +1,11 @@
+Metadata-Version: 1.0
+Name: neuralflow
+Version: 2.0.0
+Summary: Modeling neural spiking activity with a contnuous latent Langevin dynamics
+Home-page: UNKNOWN
+Author: Mikhail Genkin and Tatiana A. Engel
+Author-email: engel@cshl.edu
+License: MIT
+Description: UNKNOWN
+Keywords: Neuroscience,Machine learning,Langevin modeling
+Platform: UNKNOWN
