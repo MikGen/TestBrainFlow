@@ -219,10 +219,16 @@ def _GD_optimization(self,data,save,inference,optimization):
                     F-=gd_update
                     if etaf!=0:
                         F -= etaf*self.FeatureComplexityFderiv(peq=peq)
+
+                    # (09/05/21) constrain for periodic BC: ------------------------------------------------------
+                    # project F(x) back to periodic constaint space so that p_eq(-1) = p_eq(1) by ensuring int(F) = 0:
+                    F = F - 0.5*np.sum(F*self.w_d_)
+                    # --------------------------------------------------------------------------------------------
+
                     peq =np.exp(self.Integrate(F))
                     peq=np.maximum(peq,10**(-10))
                     peq/=np.sum(peq*self.w_d_)
-                    #Update rho0 as denominator has been changed
+                    # Update rho0 as denominator has been changed
                     if rho0 is not None:
                         rho0=p0/np.sqrt(peq)
                         rho0[peq<10**-3]=0

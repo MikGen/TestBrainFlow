@@ -7,7 +7,7 @@ import math
 from tqdm import tqdm
 from .energy_model_settings import MINIMUM_PEQ
 
-def generate_data(self, deltaT=0.00001, time_epoch = [(0,1)], decision_bnd=None,last_event_is_spike=True):
+def generate_data(self, deltaT=0.00001, time_epoch = [(0,1)], decision_bnd=None,last_event_is_spike=False):
     """Generate spike data and latent trajectories 
     
     
@@ -49,7 +49,7 @@ def generate_data(self, deltaT=0.00001, time_epoch = [(0,1)], decision_bnd=None,
     """
     
     #Convert decision_bnd into a list for convinience if needed    
-    if decision_bnd is None:
+    if decision_bnd is None: # always set to None
         decision_bnd=[None]*len(time_epoch)
     #By default, the boundary mode is reflecting
     boundary_mode = self.boundary_mode if self.boundary_mode is not None else 'reflecting' 
@@ -122,7 +122,7 @@ def _generate_data(self, peq, p0, D, firing_rate_model, num_neuron, boundary_mod
         end_of_trial=None
 
     
-    # transform spikes to ISIs
+    # transform spikes to ISIs # interspike intervals
     data = self.transform_spikes_to_isi(spikes, time_epoch, last_event_is_spike, end_of_trial)
 
     #record metadata
@@ -245,6 +245,7 @@ def _generate_inhom_poisson(self, time, rate):
         
         
 def _generate_diffusion(self, peq, p0, D, boundary_mode, deltaT, time_epoch, decision_bnd):
+    # generating latent trajectory 
     """Sample latent trajectory by integration of Langevin equation
     
 
@@ -283,7 +284,7 @@ def _generate_diffusion(self, peq, p0, D, boundary_mode, deltaT, time_epoch, dec
         
    
     metadata={}
-    metadata['absorption_event']=[]
+    metadata['absorption_event']=[] # collection
     num_trial = len(time_epoch)
     
     #define decision_bnd that are only used in absorbtion and sticky modes 
@@ -294,7 +295,7 @@ def _generate_diffusion(self, peq, p0, D, boundary_mode, deltaT, time_epoch, dec
     
     # pre-allocate output
     x = np.empty(num_trial,dtype=np.ndarray)
-    time_bins = np.empty(num_trial,dtype=np.ndarray)
+    time_bins = np.empty(num_trial,dtype=np.ndarray) # each time point t
 
     #TODO: rewrite initial conditions so that it samples enough from within the boundaries
 
@@ -306,7 +307,7 @@ def _generate_diffusion(self, peq, p0, D, boundary_mode, deltaT, time_epoch, dec
     peq0 += MINIMUM_PEQ
     peq0 /= self.w_d_.dot(peq0)
     # compute force profile from the potential
-    force = (self.dmat_d_.dot(peq0))/peq0
+    force = (self.dmat_d_.dot(peq0))/peq0 # we work with force instead of p_eq
     
     #fix very high values on the boundary
     force[(np.abs(force)>0.05/(D*deltaT)) & (self.x_d_ < 0)] =  0.05/(D*deltaT)
@@ -321,9 +322,9 @@ def _generate_diffusion(self, peq, p0, D, boundary_mode, deltaT, time_epoch, dec
     
     for i,iTrial in enumerate(iter_list):
         # generate time bins
-        time_bins[iTrial] =  np.arange(time_epoch[iTrial][0],time_epoch[iTrial][1],deltaT)
+        time_bins[iTrial] =  np.arange(time_epoch[iTrial][0],time_epoch[iTrial][1],deltaT) # uniform time intervals
         num_bin = len( time_bins[iTrial] ) - 1
-        y = np.zeros(num_bin+1)
+        y = np.zeros(num_bin+1) # diffusion trajectory
         y[0] = x0[iTrial]
         
         # generate random numbers
@@ -344,6 +345,7 @@ def _generate_diffusion(self, peq, p0, D, boundary_mode, deltaT, time_epoch, dec
                 theta = (y[iBin] - self.x_d_[ind-1])/(self.x_d_[ind]-self.x_d_[ind-1])
                 f = (1.0-theta)*force[ind-1] + theta*force[ind]
             
+            # UPDATE:
             #y_curr = y[iBin]
             y[iBin+1] = y[iBin] + D*f*deltaT + noise[iBin]
             # clip at the domain boundaries
@@ -351,8 +353,10 @@ def _generate_diffusion(self, peq, p0, D, boundary_mode, deltaT, time_epoch, dec
             
             # Reflecting Boundary:
             if boundary_mode == "reflecting":
+                # go over and reflect 
                 y[iBin+1]=min(max(y[iBin+1], 2*self.x_d_[0]-y[iBin+1]), 2*self.x_d_[-1]-y[iBin+1])
                 #Regenerate the values if nouise magnitude was very high
+                # when step too large >> range:
                 error_state = True
                 while error_state:
                     if y[iBin+1] < self.x_d_[0] or y[iBin+1] > self.x_d_[-1]:
@@ -365,6 +369,7 @@ def _generate_diffusion(self, peq, p0, D, boundary_mode, deltaT, time_epoch, dec
                 if y[iBin + 1] < bounds[i][0] or y[iBin+1] > bounds[i][1]:
                     max_ind = iBin
                     break
+
             elif boundary_mode == "sticky": # Maybe needed for the future projects, use at your own risk
                 if y[iBin + 1] <= bounds[i][0]: 
                    y[iBin+1:]=bounds[i][0]
@@ -372,6 +377,21 @@ def _generate_diffusion(self, peq, p0, D, boundary_mode, deltaT, time_epoch, dec
                 elif y[iBin+1] >= bounds[i][1]:
                    y[iBin+1:]=bounds[i][1]
                    break
+            
+            ### Add periodic boundary data generation: ----------------------------------------------------------
+
+            elif boundary_mode == "circular":
+                # len of domain
+                l = bounds[i][1]- bounds[i][0]
+
+                if y[iBin+1] < bounds[i][0]:
+                    a = abs(bounds[i][0] - y[iBin+1]) 
+                    y[iBin+1] = bounds[i][1] - a%l
+            
+                elif y[iBin+1] > bounds[i][1]:
+                    b = abs(y[iBin+1] -bounds[i][1]) 
+                    y[iBin+1] = bounds[i][0] + b%l
+            ### -------------------------------------------------------------------------------------------------
         
         metadata['absorption_event'].append('absorbed') if max_ind < num_bin+1 else metadata['absorption_event'].append('observation_ended')
         x[iTrial] = y[:max_ind]

@@ -145,7 +145,8 @@ class EnergyModel(BaseEstimator):
         'custom': peq_models.custom,
         'jump_spline2': peq_models.jump_spline2,
         'linear_pot':peq_models.linear_pot,
-        'sine_waves':peq_models.sine_waves
+        'sine_waves':peq_models.sine_waves,
+        'sine_family':peq_models.sine_family
     }
 
     _boundary_modes = ['reflecting','absorbing','circular']
@@ -178,6 +179,9 @@ class EnergyModel(BaseEstimator):
     def __init__(self, num_neuron, firing_model, peq_model, p0_model, boundary_mode, D0, Nv, pde_solve_param, verbose):
         
         #Enforce the boundary conditions for the chosen boundary mode
+
+        # add circular mode ---------------------------------------------------------------------------------------
+        # circular's more casual just like reflecting/absorbing...
         if boundary_mode is not None:
 
             bcs={"reflecting":"Neumann","absorbing":"Dirichlet","circular":"periodic"}[boundary_mode]
@@ -187,13 +191,8 @@ class EnergyModel(BaseEstimator):
                 pde_solve_param["BoundCond"] =  {'coupled': bcs}
             else: 
                 pde_solve_param["BoundCond"] =  {'leftB': bcs, "rightB": bcs}  
-            
-            ## commented out 08/17:
 
-            # if verbose and "BoundCond" in pde_solve_param: 
-            #     if pde_solve_param["BoundCond"]!= {'leftB': bcs, "rightB": bcs}:
-            #         print('WARNING: Enforcing {} boundary conditions'.format(bcs))
-            # pde_solve_param["BoundCond"] =  {'leftB': bcs, "rightB": bcs}  
+        # ---------------------------------------------------------------------------------------------------------
                
         self.boundary_mode = boundary_mode
         

@@ -294,10 +294,14 @@ def uniform(x, w):
     
     return peq
 
-def sine_waves(x, w, xbegin=-1.0, xend=1.0):
-    """Cosine-squareed model.
 
-        y, L --> peq(y, L) ~ cos( y*pi/L )**2
+
+# add sinusoidal waves, can specify periodicity and shift--------------------------------------------------------------
+def sine_waves(x, w, xbegin=-1.0, xend=1.0, omega = 1, theta = 0):
+
+    """Sine wave model. 
+
+        y, L --> peq(y, L) ~ sin(2*pi/L*omega *y + theta)
         
         integral peq(x) dx =1
         y - x centered on the middle of the domain
@@ -313,7 +317,10 @@ def sine_waves(x, w, xbegin=-1.0, xend=1.0):
         Left boundary of the x domain. The default is -1.
     xend: float
         Right boundary of the x-domain. The default is 1.
-
+    omega: float
+        periodicity of the sine wave function: period = 2*pi/omega
+    theta: float
+        horisontal shift of the waves to the right 
     Returns
     -------
     peq : numpy array (N,), dtype=float
@@ -321,10 +328,28 @@ def sine_waves(x, w, xbegin=-1.0, xend=1.0):
     """
     y = x-(xbegin+xend)/2
     L = xend-xbegin
-    peq = np.sin(2*y*np.pi/L)+2
+    peq = np.sin(omega*2*np.pi*y/L+theta) + 2 
+    peq /= sum(w*peq)
+
+    return peq
+
+
+# add a testing peq_model ----------------------------------------------------------------------------------
+def sine_family(x, w, xbegin=-1.0, xend=1.0):
+    """
+    this is the test funciton for solving FPE, we create a finite sine family that we know would reduce the function space to two,
+    so as to obtain the real analytical solution
+    """
+    y = x-(xbegin+xend)/2
+    L = xend-xbegin
+   
+    peq = 1/3*np.sin(np.pi*x) + 1/6*np.sin(2*np.pi*x) + 1/2  
     # normalization
     peq /= sum(w*peq)
+
     return peq
+# -------------------------------------------------------------------------------------------------------
+
 
 peq_model_mixtures = {
     'cos_square': cos_square,
