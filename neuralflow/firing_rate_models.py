@@ -34,7 +34,7 @@ def custom(x,lambdafunc=None):
 
 def rectified_linear(x, r_slope=50.0, x_thresh=-1.0):
     """Rectified-linear firing rate model.
-    x, r_slope, x_thresh --> r(x, r_slope, x_thresh) = max[ r_slope*(x - x_thresh), 0 ]
+    r(x, r_slope, x_thresh) = max[ r_slope*(x - x_thresh), 0 ]
 
     Parameters
     ----------
@@ -55,7 +55,7 @@ def rectified_linear(x, r_slope=50.0, x_thresh=-1.0):
 
 def linear (x, r_slope = 50.0, r_bias = 2):
     """Linear firing rate model.
-    
+    r(x, r_slope, r_bias) = max[ r_slope * x + r_bias, 0 ]
 
     Parameters
     ----------

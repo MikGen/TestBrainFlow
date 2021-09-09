@@ -15,7 +15,6 @@ def getGamma0(np.ndarray[np.float64_t, ndim=2] G,
     
     
     cdef int j, k
-
     for j in range(Nv):
         for k in range(Nv):
             if j==k:
