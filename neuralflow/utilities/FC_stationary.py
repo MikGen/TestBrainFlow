@@ -3,7 +3,7 @@
 # -*- coding: utf-8 -*-
 
 """
-feature_consistency module
+FC_stationary module
 --------------------------------------------------
 
 Below are the complimentary functions for Model selection based on feature complexity analysis for stationary data.
