@@ -10,7 +10,7 @@ The source code for the following publications:
 
 **Link:** https://arxiv.org/abs/2012.14944
 
-2)  **Genkin, M., Engel, T.A. Moving beyond generalization to accurate interpretation of flexible models. Nat Mach Intell 2, 674–683 (2020)**.  
+2) **Genkin, M., Engel, T.A. Moving beyond generalization to accurate interpretation of flexible models. Nat Mach Intell 2, 674–683 (2020)**.  
 
 **Link:** https://www.nature.com/articles/s42256-020-00242-6/
 
