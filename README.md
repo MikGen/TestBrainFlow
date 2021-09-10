@@ -4,7 +4,7 @@
 
 Computational framework for modeling neural activity with continuous latent Langevin dynamics. 
 
-Quick installation: pip install git+https://github.com/engellab/neuralflow
+Quick installation: ```pip install git+https://github.com/engellab/neuralflow```
 
 The source code for the following publications:
 
