@@ -4,6 +4,8 @@
 
 Computational framework for modeling neural activity with continuous latent Langevin dynamics. 
 
+Quick installation: pip install git+https://github.com/engellab/neuralflow
+
 The source code for the following publications:
 
 1) **Genkin, M., Hughes, O. and Engel, T.A., 2020. Learning non-stationary Langevin dynamics from stochastic observations of latent trajectories. arXiv preprint arXiv:2012.14944 (2020)**.
