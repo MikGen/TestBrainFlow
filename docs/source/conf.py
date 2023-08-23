@@ -43,7 +43,7 @@ release = '1.0.0'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['sphinx.ext.autodoc', 'numpydoc', 'nbsphinx', 'sphinx.ext.mathjax', 'sphinx.ext.napoleon']
-
+html_theme =  'sphinx_rtd_theme'
 napoleon_google_docstring = True
 napoleon_use_param = False
 napoleon_use_ivar = True
