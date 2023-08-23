@@ -1,4 +1,5 @@
 #Additional requirements for project compilation at readthedocs 
 numpydoc
 nbsphinx
--e .
+sphinx==7.1.2
+sphinx-rtd-theme==1.3.0rc1
