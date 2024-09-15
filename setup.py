@@ -3,7 +3,7 @@ from distutils.extension import Extension
 dist.Distribution().fetch_build_eggs(['numpy'])
 import numpy as numpy
 
-USE_CYTHON = 0   # change to 1 to build the extension from pyx.
+USE_CYTHON = 1   # change to 0 to build the extension from c.
 
 ext = '.pyx' if USE_CYTHON else '.c'
 
@@ -17,9 +17,9 @@ if USE_CYTHON:
 
 setup(name='neuralflow',
       description='Modeling neural spiking activity with a contnuous latent Langevin dynamics',
-      version='2.0.0',
+      version='3.0.0',
       ext_modules=extensions,
-      packages=["neuralflow", "neuralflow.utilities"],
+      packages=["neuralflow"],
       keywords='Neuroscience, Machine learning, Langevin modeling',
       author='Mikhail Genkin and Tatiana A. Engel',
       author_email='engel@cshl.edu',
@@ -29,7 +29,8 @@ setup(name='neuralflow',
       install_requires=[
           'numpy',
           'matplotlib',
-          'scipy',
+          'pandas',
+          'scipy>=1.14.0',
           'tqdm',
           'scikit-learn',
       ],
