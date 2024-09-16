@@ -1,4 +1,4 @@
-#Additional requirements for project compilation at readthedocs 
-numpydoc
+#Additional requirements for project compilation at readthedocs
+# numpydoc
 nbsphinx
 -e .
