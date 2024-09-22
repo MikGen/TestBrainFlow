@@ -2,4 +2,4 @@
 numpydoc
 nbsphinx
 sphinx-rtd-theme
--e .
+.
