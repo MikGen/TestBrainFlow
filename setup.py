@@ -1,6 +1,7 @@
 from setuptools import setup, dist
-from distutils.extension import Extension
-dist.Distribution().fetch_build_eggs(['numpy'])
+from setuptools.extension import Extension
+#from distutils.extension import Extension
+#dist.Distribution().fetch_build_eggs(['numpy'])
 import numpy as numpy
 
 USE_CYTHON = 1   # change to 0 to build the extension from c.
@@ -8,7 +9,13 @@ USE_CYTHON = 1   # change to 0 to build the extension from c.
 ext = '.pyx' if USE_CYTHON else '.c'
 
 
-extensions = [Extension("neuralflow.c_get_gamma", ["neuralflow/c_get_gamma" + ext], include_dirs=[numpy.get_include(), "neuralflow/"])]
+extensions = [
+    Extension(
+        "neuralflow.c_get_gamma", 
+        ["neuralflow/c_get_gamma" + ext], 
+        include_dirs=[numpy.get_include(), "neuralflow/"]
+        )
+    ]
 
 if USE_CYTHON:
     from Cython.Build import cythonize
