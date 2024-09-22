@@ -1,31 +1,13 @@
 Implementation
 ==============
 
-.. _Energymodel_class:
-
-EnergyModel class
+Model
 -----------------
 
-.. autoclass:: neuralflow.EnergyModel
+.. automodule:: neuralflow.model
    :members: 
-   :exclude-members: get_params, set_params
+   
 
-PDESolve class
----------------
-
-.. autoclass:: neuralflow.PDESolve
-    :members:
-
-.. _Utilities:
-
-Utility functions
------------------
-
-.. automodule:: neuralflow.utilities.FC_stationary
-    :members:
-
-.. automodule:: neuralflow.utilities.FC_nonstationary
-    :members:
 
 
 
