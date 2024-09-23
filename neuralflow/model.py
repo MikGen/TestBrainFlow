@@ -15,60 +15,61 @@ logger = logging.getLogger(__name__)
 
 
 class model:
+    """Model class supports one or multiple Langevin dynamics defined by
+    peq(x), p0(x), D, fr(x). For multiple dynamics, some of the parameters
+    can be shared which is defined by params_size dictionary. For example,
+    if we want to model 4 conditions, we might want a model with four
+    Langevin dynamics.
+
+
+    Parameters
+    ----------
+    peq : numpy array, (num_models, grid.N)
+        peq function evaluated on a grid.
+    p0 : numpy array, (num_models, grid.N) or None
+        p0 function evaluated on a grid. If set to None, assume equilibirum
+        model.
+    D : numpy array, (num_models,)
+        Diffusion, or noise magnitude.
+    fr : numpy array, (num_models, grid.N, num_neuron)
+        Firing rate function for each neuron.
+    params_size : dict
+        Number of distinct functions in the model. For each of the
+        parameters (peq, p0, D, fr), it specifies whether the parameter is
+        shared across the dynamics (in which case the value is 1), or
+        non-shared (in which case the value is equal to num_models). For
+        example, if there are 4 Langevin dynamics with distinct potentials,
+        but shared p0, D, and fr, then params_size = {'peq': 4, 'p0': 1,
+        'D': 1, 'fr': 1}.
+    grid : grid.GLLgrid object
+        Initialized GLL grid. Should be initiatialized with with_cuda=True
+        for GPU support.
+    peq_model : dict, optional
+        Specify peq model that was used to initialize peq. This is only
+        needed to keep a record. The default is None.
+    p0_model : dict, optional
+        Specify p0 model that was used to initialize p0. This is only
+        needed to keep a record. The default is None.
+    fr_model : list, optional
+        For each neuron this specifies a fr model. This is only
+        needed to keep a record (and also can be used for data generation).
+        The default is None.
+    with_cuda : bool, optional
+       Whether to include GPU support. For GPU optimization, the platform
+       has to be cuda-enabled, and cupy package has to be installed. The
+       default is False.
+    """
 
     # Default initialization is from predefined models
     def __init__(self, peq, p0, D, fr, params_size, grid,
                  peq_model=None, p0_model=None, fr_model=None,
                  with_cuda=False):
-        """Model class supports one or multiple Langevin dynamics defined by
-        peq(x), p0(x), D, fr(x). For multiple dynamics, some of the parameters
-        can be shared which is defined by params_size dictionary. For example,
-        if we want to model 4 conditions, we might want a model with four
-        Langevin dynamics.
-
-
-        Parameters
-        ----------
-        peq : numpy array, (num_models, grid.N)
-            peq function evaluated on a grid.
-        p0 : numpy array, (num_models, grid.N) or None
-            p0 function evaluated on a grid. If set to None, assume equilibirum
-            model.
-        D : numpy array, (num_models,)
-            Diffusion, or noise magnitude.
-        fr : numpy array, (num_models, grid.N, num_neuron)
-            Firing rate function for each neuron.
-        params_size : dict
-            Number of distinct functions in the model. For each of the
-            parameters (peq, p0, D, fr), it specifies whether the parameter is
-            shared across the dynamics (in which case the value is 1), or
-            non-shared (in which case the value is equal to num_models). For
-            example, if there are 4 Langevin dynamics with distinct potentials,
-            but shared p0, D, and fr, then params_size = {'peq': 4, 'p0': 1,
-            'D': 1, 'fr': 1}.
-        grid : grid.GLLgrid object
-            Initialized GLL grid. Should be initiatialized with with_cuda=True
-            for GPU support.
-        peq_model : dict, optional
-            Specify peq model that was used to initialize peq. This is only
-            needed to keep a record. The default is None.
-        p0_model : dict, optional
-            Specify p0 model that was used to initialize p0. This is only
-            needed to keep a record. The default is None.
-        fr_model : list, optional
-            For each neuron this specifies a fr model. This is only
-            needed to keep a record (and also can be used for data generation).
-            The default is None.
-        with_cuda : bool, optional
-           Whether to include GPU support. For GPU optimization, the platform
-           has to be cuda-enabled, and cupy package has to be installed. The
-           default is False.
-
+        """
         Public methods
         ------
         new_model, get_params, get_params_for_grad, get_fr_lambda, sync_model,
         compute_rho0, peq_from_force, force_from_peq, Fr_from_fr, fr_from_Fr,
-        ModelComplexity, ModelComplexityFderiv
+        FeatureComplexity, FeatureComplexityFderiv
 
         """
         self.grid = grid
@@ -376,7 +377,27 @@ class model:
         else:
             raise ValueError('Unknown mode')
 
-    def compute_rho0(self, p0, peq, device=None, min_peq=10**-20):
+    def compute_rho0(self, p0, peq, device='CPU', min_peq=10**-20):
+        """Compute rho0 from p0 and peq
+
+
+        Parameters
+        ----------
+        p0 : numpy array
+            p0(x) distribution.
+        peq : numpy array
+            peq distribution.
+        device : str, optional
+            "CPU" or "GPU". The default is None, which is "CPU".
+        min_peq : float, optional
+            Min peq to avoid division by zero. The default is 10**-20.
+
+        Returns
+        -------
+        rho0 : numpy array
+            rho0 distribution.
+
+        """
         if device == 'CPU' or device is None:
             rho0 = p0 / np.maximum(np.sqrt(peq), min_peq)
         else:
@@ -407,7 +428,7 @@ class model:
         return peq
 
     def force_from_peq(self, peq, device=None):
-        """Calculates force from peq
+        """Calculates driving force F from peq
 
 
         Parameters
@@ -427,18 +448,20 @@ class model:
         return self.grid.cuda_var.dmat_d.dot(self.cuda.cp.log(peq))
 
     def Fr_from_fr(self, fr, device=None):
-        """Calculates Fr from fr
+        """Calculates Fr (an auxiliary function for tuning function
+        optimization) from fr (tuning function)
 
 
         Parameters
         ----------
         fr : numpy array
-            An array of firin.
+            An array that represents tuning function f(x).
 
         Returns
         -------
         Fr : numpy array
-            DESCRIPTION.
+            An array that represents an auxiliary function Fr(x) for tuning
+            function optimization.
 
         """
         if device == 'CPU' or device is None:
@@ -447,13 +470,32 @@ class model:
             return self.grid.cuda_var.dmat_d.dot(self.cuda.cp.log(fr))
 
     def fr_from_Fr(self, Fr, C=1, device=None):
+        """Calculates fr (tuning function) from Fr (an auxiliary function for
+        tuning function optimization) and C (a scaling constant)
+
+
+        Parameters
+        ----------
+        Fr : numpy array
+            Fr reprsented on the grid.
+        C : float, optional
+            Constant C. The default is 1.
+        device : str, optional
+            "CPU" or "GPU". The default is None, which is CPU.
+
+        Returns
+        -------
+        numpy array
+            Tuning function fr.
+
+        """
         if device == 'CPU' or device is None:
             return C*np.exp(self.grid.AD_d.dot(Fr))
         else:
             return C*self.cuda.cp.exp(self.grid.cuda_var.AD_d.dot(Fr))
 
-    def ModelComplexity(self, model=None, model_num=0, pde_solver=None,
-                        device='CPU'):
+    def FeatureComplexity(self, model=None, model_num=0, pde_solver=None,
+                          device='CPU'):
         """Calculate feature complexity
         """
         if model is None:
@@ -483,7 +525,7 @@ class model:
             out = lib.sum(4 * result * grid.w_d)
         return out
 
-    def ModelComplexityFderiv(self, peq, device='CPU'):
+    def FeatureComplexityFderiv(self, peq, device='CPU'):
         """Calculate variational derivative of equilirium model complexity
         w.r.t. force F. Used in Genkin, Engel 2020 for regularization.
         """
@@ -500,7 +542,7 @@ class model:
             term2 = 2 * \
                 self.grid.cuda_var.dmat_d.dot(
                     self.grid.cuda_var.dmat_d.dot(peq))
-        term3 = self.ModelComplexity(peq, device) * peq
+        term3 = self.FeatureComplexity(peq, device) * peq
         return self.grid.Integrate(term1+term2+term3, device=device)
 
     @staticmethod

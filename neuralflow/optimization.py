@@ -21,6 +21,38 @@ logger = logging.getLogger(__name__)
 
 
 class Optimization:
+    """
+
+
+    Parameters
+    ----------
+    dataTR : list
+        List that contains neuralflow.spike_data.SpikeData object for each
+        datasample in the data. For each datasample a separate model will
+        be trained, however, it is allowed to have shared parameters across
+        datasamples (e.g. allow different potentials but the same D, p0,
+        and fr). Usually the number of datasamples is the number of
+        conditions in the experimental data.
+    init_model : neuralflow.model.model
+        A model object. model.num_models should be equal to number of data
+        samples.
+    optimizer_name : str
+        ENUM('ADAM', 'GD').
+    opt_options : dict
+        Optimization options (see init method of each of the optimizers).
+    line_search_options : dict, optional
+        Line search options. The default is {}.
+    pde_solve_params : dict, optional
+        Parameters for solving FPE. The default is {}.
+    boundary_mode : str, optional
+        'absorbing' or 'reflecting'. The default is 'absorbing'.
+    save_options : dict, optional
+        Options for saving the results. The default is {}.
+    dataCV : list, optional
+        Validation data. The default is None.
+    device : str, optional
+        'CPU' or 'GPU'. The default is 'CPU'.
+    """
 
     def __init__(
         self, dataTR, init_model, optimizer_name, opt_options,
@@ -28,36 +60,6 @@ class Optimization:
         boundary_mode='absorbing', save_options={}, dataCV=None, device='CPU'
     ):
         """
-
-
-        Parameters
-        ----------
-        dataTR : list
-            List that contains neuralflow.spike_data.SpikeData object for each
-            datasample in the data. For each datasample a separate model will
-            be trained, however, it is allowed to have shared parameters across
-            datasamples (e.g. allow different potentials but the same D, p0,
-            and fr). Usually the number of datasamples is the number of
-            conditions in the experimental data.
-        init_model : neuralflow.model.model
-            A model object. model.num_models should be equal to number of data
-            samples.
-        optimizer_name : str
-            ENUM('ADAM', 'GD').
-        opt_options : dict
-            Optimization options (see init method of each of the optimizers).
-        line_search_options : dict, optional
-            Line search options. The default is {}.
-        pde_solve_params : dict, optional
-            Parameters for solving FPE. The default is {}.
-        boundary_mode : str, optional
-            'absorbing' or 'reflecting'. The default is 'absorbing'.
-        save_options : dict, optional
-            Options for saving the results. The default is {}.
-        dataCV : list, optional
-            Validation data. The default is None.
-        device : str, optional
-            'CPU' or 'GPU'. The default is 'CPU'.
 
         Public methods
         ------
@@ -592,7 +594,7 @@ class Optimization:
             if self.optimizer.opt_options['etaf'] != 0:
                 F = (
                     F - self.optimizer.opt_options['etaf'] *
-                    model.ModelComplexityFderiv(peq, self.device)
+                    model.FeatureComplexityFderiv(peq, self.device)
                 )
             peq_old = peq.copy()
 

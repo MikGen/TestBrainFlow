@@ -10,35 +10,37 @@ logger = logging.getLogger(__name__)
 
 class FC_tools:
 
+    """Feature consistency analysis for model selection
+
+
+    Parameters
+    ----------
+    non_equilibrium : bool
+        Whether or not the model is non_equilibrium.
+    model : neuralflow.model
+        Model class variable, which is used to extract those parameters
+        that were not optimized. Also used for the integration/differention
+        operations on GLL grid.
+    terminal_time : float, optional
+        Terminal time for non-equilibrium JS divergence calculation in
+        seconds. Only used for non-equilibrium analysis. Should set to a
+        a typical reaction time for absorbing case. If working with
+        reflective mode, set it to trial duration. Different trial
+        durations for reflecting are not supported. The default is 1.
+    number_of_timesteps : int, optional
+        Number of timesteps for non-equilibrium JS divergence calculation.
+        Only used for non-equilibrium analysis. It is recommended to set
+        this equal to ten times terminal_time. The default is 10.
+    boundary_mode : str, optional
+        Boundary mode is needed for non-equilibrium analysis, as we need to
+        solve FPE to compute feature complexity and JS divergence. The
+        default is 'absorbing'.
+
+    """
+
     def __init__(self, non_equilibrium, model, terminal_time=1,
                  number_of_timesteps=10, boundary_mode='absorbing'):
-        """
 
-
-        Parameters
-        ----------
-        non_equilibrium : bool
-            Whether or not the model is non_equilibrium.
-        model : neuralflow.model
-            Model class variable, which is used to extract those parameters
-            that were not optimized. Also used for the integration/differention
-            operations on GLL grid.
-        terminal_time : float, optional
-            Terminal time for non-equilibrium JS divergence calculation in
-            seconds. Only used for non-equilibrium analysis. Should set to a
-            a typical reaction time for absorbing case. If working with
-            reflective mode, set it to trial duration. Different trial
-            durations for reflecting are not supported. The default is 1.
-        number_of_timesteps : int, optional
-            Number of timesteps for non-equilibrium JS divergence calculation.
-            Only used for non-equilibrium analysis. It is recommended to set
-            this equal to ten times terminal_time. The default is 10.
-        boundary_mode : str, optional
-            Boundary mode is needed for non-equilibrium analysis, as we need to
-            solve FPE to compute feature complexity and JS divergence. The
-            default is 'absorbing'.
-
-        """
         self.non_equilibrium = non_equilibrium
         self.model = model
         self.grid = model.grid
@@ -520,6 +522,22 @@ class FC_tools:
 
     @staticmethod
     def moving_average(x, w):
+        """Moving average filter
+
+
+        Parameters
+        ----------
+        x : numpy array
+            signal.
+        w : int
+            Kernel width.
+
+        Returns
+        -------
+        out : numpy array
+            Filtered array.
+
+        """
         out = np.convolve(x, np.ones(w), 'same') / w
         out[-int(w / 2):] = x[-int(w / 2):]
         return out

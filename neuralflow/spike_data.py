@@ -11,72 +11,74 @@ logger = logging.getLogger(__name__)
 
 
 class SpikeData:
+    """A class for storing spike data in an ISI format and also for conversion
+    between spiketimes and ISI formats
+
+
+    Parameters
+    ----------
+    data : numpy array
+        Two formats are supported:
+        1) ISIs format: the data is numpy array of the size (N,2) of type
+        np.ndarray, where each elements is a 1D array. N is the number of
+        trials, and for each trial the first column contains all of the
+        inter spike intervals (ISIs) in seconds, and the second column
+        contains the corresponding neuronal IDs (trial termination, if
+        recorded, is indicated with -1). Neuronal Ids start from zero.
+        ISIs are represented as 1D arrays of floats, and neuronal indices
+        as 1D array of integers.
+            data[i][0] - 1D array, ISIs of type float for the trial i.
+                The last entry can optionally be the time interval between
+                the last spike and trial termination time.
+            data[i][1] - 1D array, neuronal IDs of type int64 for the trial
+                i. The last entry is -1 if the trial termination time is
+                recorded.
+        Example: create a data with 3 neurons (id 0,1,2) and two trials.
+            Trial 0 started at time 0 s and ended at 1.55 s, where neuron
+            1 spiked at 0.05 s and neuron 2 spikes at 0.55 s. Trial 1 also
+            started at 0 s, ended at 10.05 s, where neuron 0 spiked at 0.05
+            s, neuron 1 spiked at 3.05 s, and neuron 2 spiked at 1.05 and
+            6.05 s.
+            ISIs = np.empty((2, 2), dtype=np.ndarray)
+            ISIs[0][0] = np.array([0.05,0.5,1])
+            ISIs[0][1] = np.array([1,2,-1])
+            ISIs[1][0] = np.array([0.05,1,2,3,4])
+            ISIs[1][1] = np.array([0,2,1,2,-1])
+        2) spiketimes format, where the data is numpy array of size
+        (num_neuron, N) of type object, N is the number of trials. Each of
+        the entries is 1D array that specify spiketimes of each neuron on
+        each trial. In this case time_epoch array specify each trial start
+        and end times. For the example above, the spiketimes format would
+        be the following:
+            spiketimes = np.array(
+                [
+                    [np.array([], dtype=np.float64), np.array([0.05])],
+                    [np.array([0.05]), np.array([3.05])],
+                    [np.array([0.55]), np.array([1.05, 6.05])]
+                    ],
+                dtype=object
+                )
+            timeepoch = [(0, 1.55), (0, 10.05)]
+    dformat : str, optional
+        ENUM('spiketimes', 'ISIs'). The default is 'ISIs'.
+    time_epoch : list, optional
+        For each trial, specify trial start time and trial end time as a
+        tuple. Only needed for spiketimes format. The default is None.
+    num_neuron : int, optional
+        Number of neurons in the data. If not provided, will be inferred.
+        The default is None.
+    with_trial_end : bool, optional
+        Whether trial end time is recorded. The default is True.
+    with_cuda : bool, optional
+        Whether to include GPU support. For GPU optimization, the platform
+        has to be cuda-enabled, and cupy package has to be installed. The
+        default is False.
+    """
 
     def __init__(self, data, dformat='ISIs', time_epoch=None,
                  num_neuron=None, with_trial_end=True, with_cuda=False
                  ):
         """
-
-
-        Parameters
-        ----------
-        data : numpy array
-            Two formats are supported:
-            1) ISIs format: the data is numpy array of the size (N,2) of type
-            np.ndarray, where each elements is a 1D array. N is the number of
-            trials, and for each trial the first column contains all of the
-            inter spike intervals (ISIs) in seconds, and the second column
-            contains the corresponding neuronal IDs (trial termination, if
-            recorded, is indicated with -1). Neuronal Ids start from zero.
-            ISIs are represented as 1D arrays of floats, and neuronal indices
-            as 1D array of integers.
-                data[i][0] - 1D array, ISIs of type float for the trial i.
-                    The last entry can optionally be the time interval between
-                    the last spike and trial termination time.
-                data[i][1] - 1D array, neuronal IDs of type int64 for the trial
-                    i. The last entry is -1 if the trial termination time is
-                    recorded.
-            Example: create a data with 3 neurons (id 0,1,2) and two trials.
-                Trial 0 started at time 0 s and ended at 1.55 s, where neuron
-                1 spiked at 0.05 s and neuron 2 spikes at 0.55 s. Trial 1 also
-                started at 0 s, ended at 10.05 s, where neuron 0 spiked at 0.05
-                s, neuron 1 spiked at 3.05 s, and neuron 2 spiked at 1.05 and
-                6.05 s.
-                ISIs = np.empty((2, 2), dtype=np.ndarray)
-                ISIs[0][0] = np.array([0.05,0.5,1])
-                ISIs[0][1] = np.array([1,2,-1])
-                ISIs[1][0] = np.array([0.05,1,2,3,4])
-                ISIs[1][1] = np.array([0,2,1,2,-1])
-            2) spiketimes format, where the data is numpy array of size
-            (num_neuron, N) of type object, N is the number of trials. Each of
-            the entries is 1D array that specify spiketimes of each neuron on
-            each trial. In this case time_epoch array specify each trial start
-            and end times. For the example above, the spiketimes format would
-            be the following:
-                spiketimes = np.array(
-                    [
-                        [np.array([], dtype=np.float64), np.array([0.05])],
-                        [np.array([0.05]), np.array([3.05])],
-                        [np.array([0.55]), np.array([1.05, 6.05])]
-                        ],
-                    dtype=object
-                    )
-                timeepoch = [(0, 1.55), (0, 10.05)]
-        dformat : str, optional
-            ENUM('spiketimes', 'ISIs'). The default is 'ISIs'.
-        time_epoch : list, optional
-            For each trial, specify trial start time and trial end time as a
-            tuple. Only needed for spiketimes format. The default is None.
-        num_neuron : int, optional
-            Number of neurons in the data. If not provided, will be inferred.
-            The default is None.
-        with_trial_end : bool, optional
-            Whether trial end time is recorded. The default is True.
-        with_cuda : bool, optional
-            Whether to include GPU support. For GPU optimization, the platform
-            has to be cuda-enabled, and cupy package has to be installed. The
-            default is False.
-
         Public methods
         ------
         to_GPU, trial_average_fr, change_format

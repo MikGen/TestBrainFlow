@@ -17,8 +17,39 @@ from copy import deepcopy
 
 
 class PDESolve:
-    """Numerical solution of Stourm-Liouville problem/Fokker-Planck and
-    generalized Fokker-Planck equation.
+    """Numerical solution of Stourm-Liouville problem and Fokker-Planck.
+
+
+    Parameters
+    ----------
+    xbegin : float, optional
+        The left boundary of the latent state. The default is -1.
+    xend : float
+        The right boundary of the latent state. The default is 1.
+    Np : int
+        The degree of Langrange interpolation polynomial, also the
+        number of grid points at each element. The default is 8.
+    Ne : int
+        Number of SEM elements. The default is 64.
+   BoundCond : dict
+       A dictionary that specifies boundary conditions (Dirichlet, Neumann
+       or Robin). The default is {'leftB': 'Dirichlet',
+                                  'rightB': 'Dirichlet'}.
+       In case of Robin, the dictionary must also contain 'leftBCoeff'
+       and/or 'rightBCoeff', each are dictionaries with two entries
+       'c1' and 'c2' that specify BCs coefficients in the following format:
+       c1*y[xbegin]+c2*y'[xbegin]=0 (left boundary)
+       c1*y[xend]+c2*y'[xend]=0 (right boundary)
+    Nv : int, optional
+        Number of retained eigenvalues and eigenvectors of the operator H.
+        If set to None, will be equal to grid.N-2, which is the maximum
+        possible value. If Dirichlet BCs are used, it is stongly
+        recommended to set this to None to avoid spurious high-freq
+        oscillations in the fitted functions. The default is None.
+    with_cuda : bool, optional
+        Whether to include GPU support. For GPU optimization, the platform
+        has to be cuda-enabled, and cupy package has to be installed. The
+        default is False.
     """
 
     # List of availible methods
@@ -30,37 +61,6 @@ class PDESolve:
                  ):
         """
 
-
-        Parameters
-        ----------
-        xbegin : float, optional
-            The left boundary of the latent state. The default is -1.
-        xend : float
-            The right boundary of the latent state. The default is 1.
-        Np : int
-            The degree of Langrange interpolation polynomial, also the
-            number of grid points at each element. The default is 8.
-        Ne : int
-            Number of SEM elements. The default is 64.
-       BoundCond : dict
-           A dictionary that specifies boundary conditions (Dirichlet, Neumann
-           or Robin). The default is {'leftB': 'Dirichlet',
-                                      'rightB': 'Dirichlet'}.
-           In case of Robin, the dictionary must also contain 'leftBCoeff'
-           and/or 'rightBCoeff', each are dictionaries with two entries
-           'c1' and 'c2' that specify BCs coefficients in the following format:
-           c1*y[xbegin]+c2*y'[xbegin]=0 (left boundary)
-           c1*y[xend]+c2*y'[xend]=0 (right boundary)
-        Nv : int, optional
-            Number of retained eigenvalues and eigenvectors of the operator H.
-            If set to None, will be equal to grid.N-2, which is the maximum
-            possible value. If Dirichlet BCs are used, it is stongly
-            recommended to set this to None to avoid spurious high-freq
-            oscillations in the fitted functions. The default is None.
-        with_cuda : bool, optional
-            Whether to include GPU support. For GPU optimization, the platform
-            has to be cuda-enabled, and cupy package has to be installed. The
-            default is False.
 
         Public methods
         ------
@@ -261,11 +261,11 @@ class PDESolve:
         # Solve EV
         if device == 'CPU':
             # In scipy >= 1.14.0 argument eigvals chaged to subset_by_index
-            major,minor = [int(el) for el in scipy.__version__.split('.')[:2]]
-            if major>=1 and minor>=14:
+            major, minor = [int(el) for el in scipy.__version__.split('.')[:2]]
+            if major >= 1 and minor >= 14:
                 lQ, QxOrig = eigh(
                     stiffmat, massmat, subset_by_index=(0, Nv - 1)
-                    )
+                )
             else:
                 lQ, QxOrig = eigh(stiffmat, massmat, eigvals=(0, Nv - 1))
         else:

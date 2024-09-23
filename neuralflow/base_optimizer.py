@@ -318,14 +318,17 @@ class optimizer():
 
 class adam_opt(optimizer):
 
+    """ADAM optimizer
+    """
+
     @classmethod
     def initialize(
             cls, dataTR, init_model, opt_options, line_search_options,
             pde_solve_params={}, boundary_mode='absorbing',
             save_options={}, dataCV=None, device='CPU'
     ):
-        """ADAM optimizer
 
+        """Initialize ADAM optimizer
 
         Parameters
         ----------
@@ -522,13 +525,16 @@ class adam_opt(optimizer):
 
 class gd_opt(optimizer):
 
+    """Gradient-descent optimizer
+    """
+
     @classmethod
     def initialize(
             cls, dataTR, init_model, opt_options, line_search_options,
             pde_solve_params={}, boundary_mode='absorbing',
             save_options={}, dataCV=None, device='CPU'
     ):
-        """GD optimizer
+        """Initialize GD optimizer
 
 
         Parameters
@@ -630,12 +636,6 @@ class gd_opt(optimizer):
             Can be 'CPU' or 'GPU'. For GPU optimization, the platform has to be
             cuda-enabled, and cupy package has to be installed. The default is
             'CPU'.
-
-        Returns
-        -------
-        self
-            Initialized optimizer object.
-
         """
 
         # Check learning rate parameters for Adam:

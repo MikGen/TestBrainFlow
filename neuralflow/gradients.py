@@ -15,45 +15,48 @@ logger = logging.getLogger(__name__)
 
 class Grads:
 
+    """Grad class for loglikelihoods and gradient calculations.
+
+
+    Parameters
+    ----------
+    pde_solve_params : dict
+        Parameters for solveing FP equation:
+            xbegin : float
+                The left boundary of the latent state. The default is -1.
+            xend : float
+                The right boundary of the latent state. The default is 1.
+            Np : int
+                The degree of Langrange interpolation polynomial, also the
+                number of grid points at each element. The default is 8.
+            Ne : int
+                Number of SEM elements. The default is 64.
+            BoundCond : dict
+                Boundary conditions. Only include if you want to enforce
+                unusual boundary conditions. Otherwise, use boundary_mode
+                to specify boundary conditions.
+    boundary_mode : ENUM('absorbing', 'reflecting'), optional
+        Boundary mode. The default is 'absorbing'.
+    grad_list : list, optional
+        List of paramters for gradient calculation. Can include 'F', 'F0',
+        'D', 'C', 'Fr'. The default is [].
+    num_neuron : int, optional
+        Number of neurons in the model/data. The default is 1.
+    with_trial_end : bool, optional
+        Whether to take into account trial end time. The default is True.
+    device : ENUM('CPU', 'GPU'), optional
+        Device for the computations. The default is 'CPU'. For GPU
+        optimization, the platform has to be cuda-enabled, and cupy package
+        has to be installed. The default is 'CPU'.
+    """
+
     def __init__(self, pde_solve_params, boundary_mode='absorbing',
                  grad_list=[], num_neuron=1, with_trial_end=True,
                  device='CPU'):
-        """Grad class for loglikelihoods and gradient calculations.
-
-
-        Parameters
-        ----------
-        pde_solve_params : dict
-            Parameters for solveing FP equation:
-                xbegin : float
-                    The left boundary of the latent state. The default is -1.
-                xend : float
-                    The right boundary of the latent state. The default is 1.
-                Np : int
-                    The degree of Langrange interpolation polynomial, also the
-                    number of grid points at each element. The default is 8.
-                Ne : int
-                    Number of SEM elements. The default is 64.
-                BoundCond : dict
-                    Boundary conditions. Only include if you want to enforce
-                    unusual boundary conditions. Otherwise, use boundary_mode
-                    to specify boundary conditions.
-        boundary_mode : ENUM('absorbing', 'reflecting'), optional
-            Boundary mode. The default is 'absorbing'.
-        grad_list : list, optional
-            List of paramters for gradient calculation. Can include 'F', 'F0',
-            'D', 'C', 'Fr'. The default is [].
-        num_neuron : int, optional
-            Number of neurons in the model/data. The default is 1.
-        with_trial_end : bool, optional
-            Whether to take into account trial end time. The default is True.
-        device : ENUM('CPU', 'GPU'), optional
-            Device for the computations. The default is 'CPU'. For GPU
-            optimization, the platform has to be cuda-enabled, and cupy package
-            has to be installed. The default is 'CPU'.
+        """
 
         Public methods
-        ------
+        --------------
         get_grad_data
 
         """

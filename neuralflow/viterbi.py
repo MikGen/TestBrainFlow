@@ -8,19 +8,21 @@ import numpy as np
 
 class Viterbi:
 
+    """Viterbi algorithm
+
+
+    Parameters
+    ----------
+    grad : neuralflow.Grads
+        Gradient object is needed for solving FPE.
+
+    Returns
+    -------
+    None.
+    """
+
     def __init__(self, grad):
         """
-
-
-        Parameters
-        ----------
-        grad : neuralflow.Grads
-            Gradient object is needed for solving FPE.
-
-        Returns
-        -------
-        None.
-
         """
         self.grad = grad
 

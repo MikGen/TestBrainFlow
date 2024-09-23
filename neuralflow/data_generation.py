@@ -14,35 +14,32 @@ logger = logging.getLogger(__name__)
 
 
 class SyntheticData:
+    """Spike data generation from a Langevin model
+
+
+    Parameters
+    ----------
+    model : model
+        An instance of neuralflow.model.
+    boundary_mode : ENUM('absorbing', 'reflecting')
+        Boundary behavior.
+    dt : float, optional
+        Time bin size for Langevin ODE integration. The default is 0.0001.
+    record_trial_end : bool, optional
+        Whether or not to include trial end. Usually True is the best
+        choice. The default is True.
+
+    Notes
+    ------
+    No GPU support. Data generation is usually pretty fast, so CPU is
+    sufficient for this purpose.
+
+    """
 
     def __init__(
             self, model, boundary_mode, dt=0.0001,
             record_trial_end=True
     ):
-        """
-        Parameters
-        ----------
-        model : model
-            An instance of neuralflow.model.
-        boundary_mode : ENUM('absorbing', 'reflecting')
-            Boundary behavior.
-        dt : float, optional
-            Time bin size for Langevin ODE integration. The default is 0.0001.
-        record_trial_end : bool, optional
-            Whether or not to include trial end. Usually True is the best
-            choice. The default is True.
-
-        Public methods
-        ------
-        generate_data
-
-        Notes
-        ------
-        No GPU support. Data generation is usually pretty fast, so CPU is
-        sufficient for this purpose.
-
-        """
-
         self.model = model
         self.grid = model.grid
         if boundary_mode not in implemented_bms:

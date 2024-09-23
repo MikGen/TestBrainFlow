@@ -14,32 +14,29 @@ from operator import mul
 
 
 class GLLgrid():
+    """Grid class that calculates Gauss-Lobatto-Legendre grid and implements
+    integration and differentiation on the grid.
+
+    Parameters
+    ----------
+    xbegin : float
+        The left boundary of the latent state. The default is -1.
+    xend : float
+        The right boundary of the latent state. The default is 1.
+    Np : int
+        The degree of Langrange interpolation polynomial, also the
+        number of grid points at each element. The default is 8.
+    Ne : int
+        Number of SEM elements. The default is 64.
+    with_cuda : bool, optional
+        Whether to include GPU support. For GPU optimization, the platform
+        has to be cuda-enabled, and cupy package has to be installed. The
+        default is False.
+
+    """
 
     def __init__(self, xbegin=-1, xend=1, Np=8, Ne=64, with_cuda=False):
-        """
 
-
-        Parameters
-        ----------
-        xbegin : float
-            The left boundary of the latent state. The default is -1.
-        xend : float
-            The right boundary of the latent state. The default is 1.
-        Np : int
-            The degree of Langrange interpolation polynomial, also the
-            number of grid points at each element. The default is 8.
-        Ne : int
-            Number of SEM elements. The default is 64.
-        with_cuda : bool, optional
-            Whether to include GPU support. For GPU optimization, the platform
-            has to be cuda-enabled, and cupy package has to be installed. The
-            default is False.
-
-        Public methods
-        ------
-        Differentiate, Integrate
-
-        """
         self.xbegin = xbegin
         self.xend = xend
         self.Np = Np
