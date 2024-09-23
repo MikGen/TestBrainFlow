@@ -18,10 +18,11 @@ import sys
 import os
 on_rtd = os.environ.get('READTHEDOCS') == 'True'
 if on_rtd:
-     sys.path.append('../../')    
+     sys.path.append('../..')
+     sys.path.append('..')  
 else:
-    sys.path.insert(0, os.path.abspath('../../'))
-    sys.path.insert(0, os.path.abspath('../'))
+    sys.path.insert(0, os.path.abspath('../..'))
+    sys.path.insert(0, os.path.abspath('..'))
 
 
 # -- Project information -----------------------------------------------------
