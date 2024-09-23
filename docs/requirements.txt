@@ -2,4 +2,6 @@
 numpydoc
 nbsphinx
 sphinx-rtd-theme
-.
+Cython
+numpy
+-e .

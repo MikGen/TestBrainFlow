@@ -11,6 +11,7 @@ from neuralflow.utilities.rank_nullspace import nullspace
 import numpy as np
 import numpy.matlib
 import numbers
+import scipy
 from scipy import linalg
 from copy import deepcopy
 
@@ -259,11 +260,14 @@ class PDESolve:
 
         # Solve EV
         if device == 'CPU':
-            # lQ, QxOrig = eigh(stiffmat, massmat, eigvals=(0, Nv - 1))
-            # In scipy >1.14.0 argument eigvals chaged to subset_by_index
-            # If using previous scipy version, uncomment line 262 and comment
-            # out line 266
-            lQ, QxOrig = eigh(stiffmat, massmat, subset_by_index=(0, Nv - 1))
+            # In scipy >= 1.14.0 argument eigvals chaged to subset_by_index
+            major,minor = [int(el) for el in scipy.__version__.split('.')[:2]]
+            if major>=1 and minor>=14:
+                lQ, QxOrig = eigh(
+                    stiffmat, massmat, subset_by_index=(0, Nv - 1)
+                    )
+            else:
+                lQ, QxOrig = eigh(stiffmat, massmat, eigvals=(0, Nv - 1))
         else:
             # in cupy generalized EV is not supported. Thus convert it to conv
             # EV problem by multiplying both sides by inverted mass matrix

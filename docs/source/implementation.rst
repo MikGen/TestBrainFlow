@@ -1,10 +1,12 @@
 Implementation
 ==============
 
+.. _Energymodel_class:
+
 Model
 -----------------
 
-.. automodule:: neuralflow.model
+.. autoclass:: neuralflow.model
    :members: 
    
 
